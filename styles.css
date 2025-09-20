@@ -1,0 +1,49 @@
+/* css styles */
+.card {
+   border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+   border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+   border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  margin: 15px;   /* separa cada card dos vizinhos */
+  padding: 10px;  /* espaço interno para o conteúdo */
+}
+.card {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+}
+
+/* Aumentar a logo na navbar (claro e escuro) */
+.navbar .navbar-brand .navbar-logo.light-content,
+.navbar .navbar-brand .navbar-logo.dark-content {
+  height: 70px !important;     /* ajuste aqui */
+  max-height: 70px !important; /* MUITO importante: supera o limite do tema */
+  width: auto !important;       /* mantém proporção */
+  display: block;               /* evita “sobras” de linha */
+}
+
+/* Ajustes de alinhamento para não “amassar” a navbar */
+.navbar-brand {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Garanta espaço vertical suficiente para a navbar quando a logo for maior */
+.navbar {
+  min-height: 76px; /* ~altura da logo + pequenas margens; ajuste se necessário */
+}
+
+/* Em telas pequenas, use uma versão mais baixa para não estourar o menu */
+@media (max-width: 991.98px) {
+  .navbar .navbar-brand .navbar-logo.light-content,
+  .navbar .navbar-brand .navbar-logo.dark-content {
+    height: 48px !important;
+    max-height: 48px !important;
+  }
+  .navbar { min-height: 56px; }
+}

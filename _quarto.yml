@@ -1,0 +1,30 @@
+project:
+  type: website
+
+website:
+   navbar:
+    logo: imagens/logo_texto.png   # caminho da sua logo
+    left:
+      - href: dic.qmd
+        text: DIC
+      - about.qmd
+
+format:
+  html:
+    theme:
+      - cosmo
+      - brand
+    css: styles.css
+    code-fold: false
+    code-tools: false
+    max-width: 1400px
+    grid:
+      body-width: 1400px
+      sidebar-width: 250px
+      margin-width: 200px
+        
+execute:
+  echo: false
+  warning: false
+  message: false
+  eval: true

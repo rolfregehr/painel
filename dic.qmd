@@ -1,0 +1,267 @@
+```{r}
+pacman::p_load(tidyverse, jsonlite)
+load("./r/dic/sim_dic.rda")
+cores <- c(
+  '#FED789FF',
+  '#023743FF',
+  '#72874EFF',
+  '#476F84FF',
+  '#A4BED5FF',
+  '#453947FF'
+)
+
+
+dic_genero_idade <- sim_dic |>
+  group_by(idade, genero) |>
+  reframe(n = n()) |>
+  pivot_wider(names_from = genero, values_from = n, values_fill = 0) |>
+  select(-Outro) |>
+  write_json('./fontes/dic_genero_idade.json')
+
+```
+
+
+
+
+::: {.columns}
+
+
+::: {.column width="65%"}
+::: {.card}
+###  I21 - Infarto agudo do miocárdio
+É a principal causa de mortalidade no Brasil
+:::
+:::
+
+::: {.column width="35%"}
+::: {.card}
+### DIC são evitáveis
+:::
+:::
+:::
+
+
+```{ojs}
+// Célula 1: Importação
+d3 = require("d3@7")
+
+// Célula 2: Carregamento dos dados
+data = FileAttachment("fontes/dic_genero_idade.json").json()
+
+// Célula 3: Slider de range duplo
+viewof ageRange = {
+  const form = html`<div style="font-family: sans-serif;">
+    <label style="font-weight: bold; margin-bottom: 10px; display: block;">
+      Filtro de Idade: <span id="range-display">0 - 100 anos</span>
+    </label>
+    <div style="position: relative; width: 100%; height: 50px; margin: 20px 0;">
+      <!-- Track de fundo -->
+      <div style="position: absolute; top: 22px; left: 0; right: 0; height: 6px; background: #ddd; border-radius: 3px;"></div>
+      <!-- Track do range selecionado -->
+      <div id="range-track" style="position: absolute; top: 22px; height: 6px; background: #007bff; border-radius: 3px;"></div>
+      <!-- Slider do mínimo -->
+      <input type="range" min="0" max="100" value="0" step="1" id="min-slider"
+             style="position: absolute; width: 100%; height: 6px; background: transparent; -webkit-appearance: none; outline: none;">
+      <!-- Slider do máximo -->
+      <input type="range" min="0" max="100" value="100" step="1" id="max-slider"
+             style="position: absolute; width: 100%; height: 6px; background: transparent; -webkit-appearance: none; outline: none;">
+    </div>
+
+  </div>`;
+  
+  const minSlider = form.querySelector('#min-slider');
+  const maxSlider = form.querySelector('#max-slider');
+  const display = form.querySelector('#range-display');
+  const rangeTrack = form.querySelector('#range-track');
+  
+  // Estilizar os sliders
+  const style = html`<style>
+    #min-slider, #max-slider {
+      pointer-events: none;
+    }
+    
+    #min-slider::-webkit-slider-thumb, #max-slider::-webkit-slider-thumb {
+      pointer-events: all;
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    
+    #min-slider::-webkit-slider-thumb {
+      background: #007bff;
+    }
+    
+    #max-slider::-webkit-slider-thumb {
+      background: #28a745;
+    }
+    
+    #min-slider::-moz-range-thumb, #max-slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      border: none;
+    }
+    
+    #min-slider::-moz-range-thumb {
+      background: #007bff;
+    }
+    
+    #max-slider::-moz-range-thumb {
+      background: #28a745;
+    }
+    
+    #min-slider::-webkit-slider-track, #max-slider::-webkit-slider-track {
+      background: transparent;
+      border: none;
+    }
+    
+    #min-slider::-moz-range-track, #max-slider::-moz-range-track {
+      background: transparent;
+      border: none;
+    }
+  </style>`;
+  
+  document.head.appendChild(style);
+  
+  let isDragging = false;
+  let dragTarget = null;
+  
+  // Atualizar a visualização do range
+  function updateRangeTrack() {
+    const min = parseInt(minSlider.value);
+    const max = parseInt(maxSlider.value);
+    const minPercent = (min / 100) * 100;
+    const maxPercent = (max / 100) * 100;
+    
+    rangeTrack.style.left = minPercent + '%';
+    rangeTrack.style.width = (maxPercent - minPercent) + '%';
+  }
+  
+  // Função para atualizar valores
+  function updateValues() {
+    let min = parseInt(minSlider.value);
+    let max = parseInt(maxSlider.value);
+    
+    // Trocar valores se necessário, mas manter o que está sendo arrastado
+    if (min > max) {
+      if (dragTarget === minSlider) {
+        // Se estou arrastando o mínimo e passou do máximo, 
+        // o mínimo vira máximo e vice-versa
+        [minSlider.value, maxSlider.value] = [maxSlider.value, minSlider.value];
+        [min, max] = [max, min];
+      } else if (dragTarget === maxSlider) {
+        // Se estou arrastando o máximo e passou do mínimo,
+        // o máximo vira mínimo e vice-versa  
+        [minSlider.value, maxSlider.value] = [maxSlider.value, minSlider.value];
+        [min, max] = [max, min];
+      }
+    }
+    
+    display.textContent = `${Math.min(min, max)} - ${Math.max(min, max)} anos`;
+    form.value = [Math.min(min, max), Math.max(min, max)];
+    form.dispatchEvent(new CustomEvent("input"));
+    
+    updateRangeTrack();
+  }
+  
+  // Event listeners para detectar início do arraste
+  minSlider.addEventListener("mousedown", () => {
+    isDragging = true;
+    dragTarget = minSlider;
+  });
+  
+  maxSlider.addEventListener("mousedown", () => {
+    isDragging = true;
+    dragTarget = maxSlider;
+  });
+  
+  // Event listeners para input
+  minSlider.addEventListener("input", updateValues);
+  maxSlider.addEventListener("input", updateValues);
+  
+  // Resetar quando soltar
+  document.addEventListener("mouseup", () => {
+    isDragging = false;
+    dragTarget = null;
+  });
+  
+  // Permitir clique na track para mover o slider mais próximo
+  rangeTrack.parentElement.addEventListener("click", (e) => {
+    if (isDragging) return;
+    
+    const rect = rangeTrack.parentElement.getBoundingClientRect();
+    const clickPercent = (e.clientX - rect.left) / rect.width;
+    const clickValue = Math.round(clickPercent * 100);
+    
+    const minVal = parseInt(minSlider.value);
+    const maxVal = parseInt(maxSlider.value);
+    
+    // Mover o slider mais próximo do clique
+    if (Math.abs(clickValue - minVal) < Math.abs(clickValue - maxVal)) {
+      minSlider.value = clickValue;
+    } else {
+      maxSlider.value = clickValue;
+    }
+    
+    updateValues();
+  });
+  
+  // Inicializar
+  updateRangeTrack();
+  form.value = [0, 100];
+  return form;
+}
+
+// Célula 4: Extrair valores do range
+minAge = ageRange[0]
+maxAge = ageRange[1]
+
+// Célula 5: Dados filtrados
+filteredData = data.filter(d => d.idade >= minAge && d.idade <= maxAge)
+
+// Célula 6: Estatísticas
+md`**Estatísticas do filtro atual:**
+- Idade: ${minAge} a ${maxAge} anos
+- Total Masculino: ${d3.sum(filteredData, d => d.Masc).toLocaleString()}
+- Total Feminino: ${d3.sum(filteredData, d => d.Fem).toLocaleString()}
+- Total Geral: ${d3.sum(filteredData, d => d.Masc + d.Fem).toLocaleString()}
+- Registros: ${filteredData.length} faixas etárias`
+
+// Célula 7: Gráfico com dados filtrados
+Plot.plot({
+width: 1400,
+  height: 600,
+  marginLeft: 60,
+  marginBottom: 60,
+  y: { 
+  grid: true,
+  fontSize: 30
+  },
+  color: {scheme: "RdYlBu"},
+  marks: [
+    Plot.areaY(filteredData, {
+      x: "idade",
+      y1: "Masc",
+      y2: "Fem",
+      curve: "step-after",
+      fill: (d) => (d["Masc"] < d["Fem"] ? "#FED789FF" : "#72874E80"),
+      z: null
+    }),
+    Plot.lineY(filteredData, {
+      x: "idade",
+      y: "Fem",
+      curve: "step-after",
+      stroke: "steelblue",
+      strokeWidth: 3
+    })
+  ]
+})
+```

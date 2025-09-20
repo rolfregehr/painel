@@ -1,0 +1,31 @@
+---
+title: "Nossa Saúde em Dados"
+---
+
+::::::: columns
+:::: {.column width="50%"}
+::: card
+### Doenças isquêmicas do coração (DIC)
+
+<a href="dic.qmd" class="stretched-link"></a>
+:::
+::::
+
+:::: {.column width="50%"}
+::: card
+### Card 2
+
+Outro conteúdo. <a href="dic.qmd" class="stretched-link"></a>
+:::
+::::
+:::::::
+
+::::: columns
+:::: {.column width="33%"}
+::: card
+### Card 3
+
+Mais conteúdo.
+:::
+::::
+:::::
