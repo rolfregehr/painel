@@ -4,4 +4,4 @@ title: "Sobre"
 
 Dados com informações de saúde a partir de dados oficiais.
 
-Criado e mantido por Rolf Regehr. rolf\@gmail.com
+Criado e mantido por Rolf Regehr. rolf.regehr@gmail.com

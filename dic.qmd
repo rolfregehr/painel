@@ -18,27 +18,17 @@ dic_genero_idade <- sim_dic |>
   select(-Outro) |>
   write_json('./fontes/dic_genero_idade.json')
 
+
+dic_raca_cor_idade <- sim_dic |>
+  group_by(idade, raca_cor) |>
+  reframe(n = n()) |>
+  pivot_wider(names_from = raca_cor, values_from = n, values_fill = 0) |>
+  select(-SI) |>
+  write_json('./fontes/dic_raca_cor_idade.json')
+
 ```
 
 
-
-
-::: {.columns}
-
-
-::: {.column width="65%"}
-::: {.card}
-###  I21 - Infarto agudo do miocárdio
-É a principal causa de mortalidade no Brasil
-:::
-:::
-
-::: {.column width="35%"}
-::: {.card}
-### DIC são evitáveis
-:::
-:::
-:::
 
 
 ```{ojs}
@@ -241,9 +231,14 @@ width: 1400,
   height: 600,
   marginLeft: 60,
   marginBottom: 60,
+  style: { fontSize: "18px" }, // aumenta ticks/labels de ambos os eixos
+  x: {
+    label: "Idade",
+    tickSize: 6,
+    fontSize: 100    // aumenta números no eixo X
+  },
   y: { 
-  grid: true,
-  fontSize: 30
+    grid: true,
   },
   color: {scheme: "RdYlBu"},
   marks: [
@@ -265,3 +260,148 @@ width: 1400,
   ]
 })
 ```
+
+
+```{ojs}
+//| echo: false
+echarts = require("echarts@5")
+
+
+// Ler dados do arquivo JSON
+dic_raca_cor_idade = FileAttachment("./fontes/dic_raca_cor_idade.json").json()// Filtrar dados para idades de 0 a 100
+// Filtrar dados para idades de 0 a 100
+dados_filtrados = dic_raca_cor_idade.filter(d => d.idade >= 0 && d.idade <= 100)
+
+chart = {
+  const chartDom = DOM.element('div', { style: 'width: 600px; height: 400px;' });
+  const myChart = echarts.init(chartDom);
+  
+  // Extrair as idades para o eixo X (agora filtradas)
+  const idades = dados_filtrados.map(d => d.idade);
+  
+  // Extrair as raças/cores (excluindo 'idade')
+  const racas = Object.keys(dados_filtrados[0]).filter(key => key !== 'idade');
+  
+  // Encontrar os picos para Branca, Preta e Parda
+  const racasParaMarcar = ['Branca', 'Preta', 'Parda'];
+  
+  const option = {
+    title: {
+      text: 'Distribuição por Raça/Cor e Idade (0 a 100 anos)'
+    },
+    tooltip: {
+      trigger: 'axis'
+    },
+    legend: {
+      data: racas,
+      bottom: 10
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '15%',
+      containLabel: true
+    },
+    toolbox: {
+      feature: {
+        saveAsImage: {}
+      }
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: idades,
+      name: 'Idade'
+    },
+    yAxis: {
+      type: 'value',
+      name: 'Quantidade'
+    },
+    // Configurações de animação
+    animationDuration: 3000,
+    animationEasing: 'cubicOut',
+    series: racas.map(raca => {
+      const dados = dados_filtrados.map(d => d[raca]);
+      
+      return {
+        name: raca,
+        type: 'line',
+        data: dados
+        // Removemos o markPoint daqui
+      };
+    })
+  };
+  
+  // Renderizar o gráfico inicialmente sem os markPoints
+  myChart.setOption(option);
+  
+  // Adicionar markPoints após a animação terminar
+  setTimeout(() => {
+    const seriesWithMarkPoints = racas.map(raca => {
+      const dados = dados_filtrados.map(d => d[raca]);
+      
+      // Se for uma das raças para marcar, adicionar markPoint
+      let markPoint = {};
+      if (racasParaMarcar.includes(raca)) {
+        const valorMaximo = Math.max(...dados);
+        const indiceMaximo = dados.indexOf(valorMaximo);
+        const idadeMaxima = dados_filtrados[indiceMaximo].idade;
+        
+        markPoint = {
+          data: [{
+            type: 'max',
+            label: {
+              show: true,
+              position: 'top',
+              formatter: `Idade no pico: ${idadeMaxima} anos`,
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              borderColor: '#333',
+              borderWidth: 1,
+              borderRadius: 4,
+              padding: [6, 10],
+              fontSize: 12,
+              fontWeight: 'bold'
+            },
+            symbol: 'circle',
+            symbolSize: 8
+          }],
+          animation: true,
+          animationDuration: 800
+        };
+      }
+      
+      return {
+        name: raca,
+        type: 'line',
+        data: dados,
+        markPoint: markPoint
+      };
+    });
+    
+    // Atualizar o gráfico com os markPoints
+    myChart.setOption({
+      series: seriesWithMarkPoints
+    });
+  }, 3100); // Esperar 3100ms (um pouco depois da animação das linhas)
+  
+  return chartDom;
+}
+```
+
+
+::: {.columns}
+
+
+::: {.column width="100%"}
+::: {.card}
+###  Lista de DICs
+I20 - Angina pectoris (dor torácica)  
+I21 - Infarto agudo do miocárdio - Principal causa de mortalidade no Brasil  
+I22 - Infarto do miocárdio recorrente  
+I23 - Algumas complicações atuais subseqüentes ao infarto agudo do miocárdio  
+I24 - Outras doenças isquêmicas agudas do coração  
+I25 - Doença isquêmica crônica do coração  
+:::
+:::
+
+:::

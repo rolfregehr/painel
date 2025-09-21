@@ -2,30 +2,104 @@
 title: "Nossa Saúde em Dados"
 ---
 
-::::::: columns
-:::: {.column width="50%"}
-::: card
-### Doenças isquêmicas do coração (DIC)
+<style>
+.card-azul { 
+    background: linear-gradient(135deg, #023743FF, #02374380); 
+    color: white; 
+}
+.card-verde { 
+    background: linear-gradient(135deg, #476F84FF , #476F8480); 
+    color: white; 
+}
+.card-roxo { 
+    background: linear-gradient(135deg, #72874EFF, #72874E80); 
+    color: white; 
+}
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, max-content));
+    gap: 0.5rem;
+    margin: 1rem 0;
+    justify-content: start;
+}
 
+.card {
+    padding: 1rem;
+    width: fit-content;
+    min-width: 200px;
+    max-width: 300px;
+}
+
+.card h3 { 
+    color: inherit; 
+    margin-bottom: 0.5rem; 
+    font-size: 1.1rem;
+    line-height: 1.3;
+}
+
+.card p { 
+    color: inherit; 
+    opacity: 0.9; 
+    margin-bottom: 0;
+}
+</style>
+
+::: {.card-container}
+
+::: {.card .card-placeholder}
+### Doença isquêmica do coração ✅
+CID I20 a I25
 <a href="dic.qmd" class="stretched-link"></a>
 :::
-::::
 
-:::: {.column width="50%"}
-::: card
-### Card 2
-
-Outro conteúdo. <a href="dic.qmd" class="stretched-link"></a>
+::: {.card .card-placeholder}
+### Pneumonia 🚧
+CID J12 a J18
+<a href="pneumonia.qmd" class="stretched-link"></a>
 :::
-::::
-:::::::
 
-::::: columns
-:::: {.column width="33%"}
-::: card
-### Card 3
-
-Mais conteúdo.
+::: {.card .card-placeholder}
+### Diabetes 🚧
+CID E10 a E14
 :::
-::::
-:::::
+
+::: {.card .card-placeholder}
+### Hemorragia intracerebral ou oclusão 🚧
+CID I61; I630 a I635; I638; I639; I64 a I66
+:::
+
+:::
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cores = ['card-azul', 'card-verde', 'card-roxo'];
+    const container = document.querySelector('.card-container');
+    const cards = Array.from(document.querySelectorAll('.card-placeholder'));
+    
+    // Função para embaralhar array
+    function embaralhar(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+    
+    // Embaralha os cards
+    const cardsEmbaralhados = embaralhar(cards);
+    
+    // Remove todos os cards do container
+    cards.forEach(card => card.remove());
+    
+    // Adiciona os cards embaralhados de volta
+    cardsEmbaralhados.forEach(card => {
+        // Aplica cor aleatória
+        const corAleatoria = cores[Math.floor(Math.random() * cores.length)];
+        card.classList.remove('card-placeholder');
+        card.classList.add(corAleatoria);
+        
+        // Adiciona de volta ao container
+        container.appendChild(card);
+    });
+});
+</script>

@@ -1,11 +1,10 @@
-# Use o CRAN oficial
-options(repos = c(CRAN = "https://cloud.r-project.org"))
 
-# (opcional) confirme
-getOption("repos")
+cores <- c(
+  '#FED789FF',
+  '#023743FF',
+  '#72874EFF',
+  '#476F84FF',
+  '#A4BED5FF',
+  '#453947FF'
+)
 
-# Agora instale
-install.packages("ojs")
-
-# Teste
-library(ojs)
