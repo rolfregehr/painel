@@ -273,7 +273,7 @@ dic_raca_cor_idade = FileAttachment("./fontes/dic_raca_cor_idade.json").json()//
 dados_filtrados = dic_raca_cor_idade.filter(d => d.idade >= 0 && d.idade <= 100)
 
 chart = {
-  const chartDom = DOM.element('div', { style: 'width: 600px; height: 400px;' });
+  const chartDom = DOM.element('div', { style: 'width: 450px; height: 300px;' });
   const myChart = echarts.init(chartDom);
   
   // Extrair as idades para o eixo X (agora filtradas)
@@ -387,6 +387,141 @@ chart = {
   return chartDom;
 }
 ```
+
+
+```{ojs}
+//| echo: false
+
+
+// Ler dados do arquivo JSON (cada objeto deve ter a chave "ano" + colunas de raça/cor)
+dic_raca_cor_ano = FileAttachment("./fontes/dic_raca_cor_ano.json").json()
+
+// Ordenar por ano e garantir numérico
+dados_ordenados = dic_raca_cor_ano
+  .map(d => ({ ...d, ano: +d.ano }))
+  .filter(d => !Number.isNaN(d.ano))
+  .sort((a, b) => d3.ascending(a.ano, b.ano))
+
+chart_ano = {
+  const chartDom = DOM.element('div', { style: 'width: 450px; height: 300px;' })
+  const myChart = echarts.init(chartDom)
+
+  // Eixo X com anos (ordenados)
+  const anos = dados_ordenados.map(d => d.ano)
+
+  // Descobrir as séries (todas as chaves exceto "ano")
+  const racas = Object.keys(dados_ordenados[0] || {}).filter(k => k !== 'ano')
+
+  // Raças que receberão markPoint no pico
+  const racasParaMarcar = ['Branca', 'Preta', 'Parda']
+
+  const option = {
+    title: { text: 'Distribuição por Raça/Cor ao longo dos anos' },
+    tooltip: { trigger: 'axis' },
+    legend: { data: racas, bottom: 10 },
+    grid: { left: '3%', right: '4%', bottom: '15%', containLabel: true },
+    toolbox: { feature: { saveAsImage: {} } },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: anos,
+      name: 'Ano'
+    },
+    yAxis: { type: 'value', name: 'Quantidade' },
+    // paleta base (sobrescrevemos por série logo abaixo)
+    color: ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'],
+    animationDuration: 3000,
+    animationEasing: 'cubicOut',
+    series: racas.map((raca, index) => {
+      const dados = dados_ordenados.map(d => +d[raca] || 0)
+
+      const coresPorRaca = {
+        Branca:   '#2E86AB',
+        Parda:    '#A23B72',
+        Preta:    '#F18F01',
+        Amarela:  '#C73E1D',
+        Indígena: '#592E83'
+      }
+
+      const cor = coresPorRaca[raca] || `hsl(${index * 72}, 70%, 50%)`
+
+      return {
+        name: raca,
+        type: 'line',
+        data: dados,
+        itemStyle: { color: cor },
+        lineStyle: { color: cor }
+      }
+    })
+  }
+
+  // Render inicial sem markPoints
+  myChart.setOption(option)
+
+  // Após a animação, adicionar markPoints nos picos das séries escolhidas
+  setTimeout(() => {
+    const seriesWithMarkPoints = racas.map((raca, index) => {
+      const dados = dados_ordenados.map(d => +d[raca] || 0)
+
+      const coresPorRaca = {
+        Branca:   '#FED789',  // mantive sua paleta custom
+        Parda:    '#72874E',
+        Preta:    '#476F84',
+        Amarela:  '#A4BED5',
+        Indígena: '#453947'
+      }
+
+      const cor = coresPorRaca[raca] || `hsl(${index * 72}, 70%, 50%)`
+
+      let markPoint = {}
+      if (racasParaMarcar.includes(raca) && dados.length) {
+        const valorMaximo = Math.max(...dados)
+        const indiceMaximo = dados.indexOf(valorMaximo)
+        const anoPico = anos[indiceMaximo]
+
+        markPoint = {
+          data: [{
+            type: 'max',
+            name: 'Pico',
+            label: {
+              show: false,
+              position: 'top',
+              formatter: `${raca} - pico: ${anoPico}`,
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              borderColor: cor,
+              borderWidth: 1,
+              borderRadius: 4,
+              padding: [6, 10],
+              fontSize: 12,
+              fontWeight: 'bold'
+            },
+            symbol: 'circle',
+            symbolSize: 8,
+            itemStyle: { color: cor }
+          }],
+          animation: true,
+          animationDuration: 800
+        }
+      }
+
+      return {
+        name: raca,
+        type: 'line',
+        data: dados,
+        itemStyle: { color: cor },
+        lineStyle: { color: cor },
+        markPoint
+      }
+    })
+
+    myChart.setOption({ series: seriesWithMarkPoints })
+  }, 3100)
+
+  return chartDom
+}
+
+```
+
 
 
 ::: {.columns}
