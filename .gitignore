@@ -8,3 +8,6 @@
 *.rda
 *.rds
 *.Rproj
+_site
+rascunho.r
+rascunho.R

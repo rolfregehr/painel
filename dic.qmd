@@ -26,6 +26,8 @@ dic_raca_cor_idade <- sim_dic |>
   select(-SI) |>
   write_json('./fontes/dic_raca_cor_idade.json')
 
+
+
 ```
 
 
@@ -273,7 +275,7 @@ dic_raca_cor_idade = FileAttachment("./fontes/dic_raca_cor_idade.json").json()//
 dados_filtrados = dic_raca_cor_idade.filter(d => d.idade >= 0 && d.idade <= 100)
 
 chart = {
-  const chartDom = DOM.element('div', { style: 'width: 450px; height: 300px;' });
+  const chartDom = DOM.element('div', { style: 'width: 600px; height: 400px;' });
   const myChart = echarts.init(chartDom);
   
   // Extrair as idades para o eixo X (agora filtradas)
@@ -353,7 +355,7 @@ chart = {
             label: {
               show: true,
               position: 'top',
-              formatter: `Idade no pico: ${idadeMaxima} anos`,
+              formatter: `Pico ${raca}: ${idadeMaxima} anos`,
               backgroundColor: 'rgba(255, 255, 255, 0.9)',
               borderColor: '#333',
               borderWidth: 1,
@@ -403,7 +405,7 @@ dados_ordenados = dic_raca_cor_ano
   .sort((a, b) => d3.ascending(a.ano, b.ano))
 
 chart_ano = {
-  const chartDom = DOM.element('div', { style: 'width: 450px; height: 300px;' })
+  const chartDom = DOM.element('div', { style: 'width: 600px; height: 400px;' })
   const myChart = echarts.init(chartDom)
 
   // Eixo X com anos (ordenados)

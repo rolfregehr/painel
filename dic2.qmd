@@ -1,0 +1,33 @@
+```{r}
+pacman::p_load(tidyverse, jsonlite)
+load("./r/dic/sim_dic.rda")
+load("./r/ibge/populacao_estimada.rda")
+cores <- c(
+  '#FED789FF',
+  '#023743FF',
+  '#72874EFF',
+  '#476F84FF',
+  '#A4BED5FF',
+  '#453947FF'
+)
+
+
+dic_genero_idade <- sim_dic |>
+  group_by(idade, genero) |>
+  reframe(n = n()) |>
+  pivot_wider(names_from = genero, values_from = n, values_fill = 0) |>
+  select(-Outro) |>
+  write_json('./fontes/dic_genero_idade.json')
+
+
+dic_raca_cor_idade <- sim_dic |>
+  group_by(idade, raca_cor) |>
+  reframe(n = n()) |>
+  pivot_wider(names_from = raca_cor, values_from = n, values_fill = 0) |>
+  select(-SI) |>
+  write_json('./fontes/dic_raca_cor_idade.json')
+
+
+
+
+```

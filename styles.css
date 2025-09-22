@@ -47,3 +47,32 @@
   }
   .navbar { min-height: 56px; }
 }
+
+
+/* faz o container respeitar um máximo, mas manter responsividade */
+#painel.container-fluid { max-width: 1400px; }
+
+/* “alvéolo” de cada gráfico */
+.chart {
+  width: 100%;
+  aspect-ratio: 16 / 9;   /* dá altura para o ECharts calcular */
+  min-height: 280px;      /* fallback se o navegador não suportar aspect-ratio */
+  overflow: hidden;
+  display: block;
+}
+
+/* 1º gráfico mais “panorâmico” */
+.chart.full { aspect-ratio: 21 / 9; }
+
+/* SVGs do D3/Plot fluem na largura da coluna */
+.chart svg {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100%;
+  display: block;
+}
+
+@media (max-width: 576px) {
+  .chart { aspect-ratio: 4 / 3; }
+  .chart.full { aspect-ratio: 16 / 9; }
+}
