@@ -1,48 +1,32 @@
 ```{r}
-pacman::p_load(tidyverse, jsonlite, scales)
+pacman::p_load(tidyverse, jsonlite)
 load("./r/dic/sim_dic.rda")
 cores <- c(
-    "#FED789FF",
-    "#023743FF",
-    "#72874EFF",
-    "#476F84FF",
-    "#A4BED5FF",
-    "#453947FF"
+  '#FED789FF',
+  '#023743FF',
+  '#72874EFF',
+  '#476F84FF',
+  '#A4BED5FF',
+  '#453947FF'
 )
 
 
 dic_genero_idade <- sim_dic |>
-    group_by(idade, genero) |>
-    reframe(n = n()) |>
-    pivot_wider(names_from = genero, values_from = n, values_fill = 0) |>
-    select(-Outro) 
-
-write_json(dic_genero_idade, "./fontes/dic_genero_idade.json")
+  group_by(idade, genero) |>
+  reframe(n = n()) |>
+  pivot_wider(names_from = genero, values_from = n, values_fill = 0) |>
+  select(-Outro) |>
+  write_json('./fontes/dic_genero_idade.json')
 
 
 dic_raca_cor_idade <- sim_dic |>
-    filter(idade < 100) |> 
-    group_by(idade, raca_cor) |>
-    reframe(n = n()) |>
-    pivot_wider(names_from = raca_cor, values_from = n, values_fill = 0) |>
-    select(-SI)
-
-write_json(dic_raca_cor_idade, "./fontes/dic_raca_cor_idade.json")
-
-proporcao_masc__total <- sim_dic |>
-  group_by(genero) |>
+  group_by(idade, raca_cor) |>
   reframe(n = n()) |>
-  pivot_wider(names_from = genero, values_from = n, values_fill = 0) |>
-  select(-Outro) |> 
-  mutate(prop = Masc/(Masc+Fem)) |> 
-  pull(prop)
+  pivot_wider(names_from = raca_cor, values_from = n, values_fill = 0) |>
+  select(-SI) |>
+  write_json('./fontes/dic_raca_cor_idade.json')
 
-pico_masc <- dic_genero_idade$idade[which(dic_genero_idade$Masc == max(dic_genero_idade$Masc))]
-pico_fem <- dic_genero_idade$idade[which(dic_genero_idade$Fem == max(dic_genero_idade$Fem))]
 
-pico_branca <- dic_raca_cor_idade$idade[which(dic_raca_cor_idade$Branca == max(dic_raca_cor_idade$Branca))]
-pico_parda <-  dic_raca_cor_idade$idade[which(dic_raca_cor_idade$Parda  == max(dic_raca_cor_idade$Parda))]
-pico_preta <-  dic_raca_cor_idade$idade[which(dic_raca_cor_idade$Preta  == max(dic_raca_cor_idade$Preta))]
 
 ```
 
@@ -84,41 +68,20 @@ chart_dic_genero_idade = {
     const generosParaMarcar = ['Fem', 'Masc'];
     
     const option = {
-      title: { text: 'Mortes por Gênero e Idade (0 a 100 anos)',
-  left: 'center',
-  top: 10,
-  backgroundColor: '#72874E40',
-  padding: [8, 16],
-  textStyle: {
-    color: '#000',
-    fontSize: 16,
-    fontWeight: 'bold'
-}},
+      title: { text: 'Distribuição por Gênero e Idade (0 a 100 anos)' },
       tooltip: { trigger: 'axis' },
       legend: { data: generos, bottom: 10 },
       grid: { left: '3%', right: '4%', bottom: '15%', containLabel: true },
       toolbox: { feature: { saveAsImage: {} } },
       xAxis: { type: 'category', boundaryGap: false, data: idades, name: 'Idade' },
       yAxis: { type: 'value', name: 'Quantidade' },
-      animationDuration: 2000,
+      animationDuration: 3000,
       animationEasing: 'cubicOut',
       series: generos.map(genero => ({
         name: genero,
         type: 'line',
         data: dados_filtrados_1.map(d => d[genero] ?? 0)
-      })),
-      graphic: [{
-    type: 'text',
-    // Usar coordenadas relativas ao grid (área do gráfico)
-    left: '20%',
-    top: '30%',
-    style: {
-      text: "",
-      fontSize: 20,
-      fill: 'rgba(34, 7, 7, 0.5)',
-      fontWeight: 'bold'
-    }
-  }]
+      }))
     };
     
     // Renderiza linhas primeiro
@@ -167,7 +130,7 @@ chart_dic_genero_idade = {
       });
       
       myChart.setOption({ series: seriesComPicos });
-    }, 2100);
+    }, 3100);
 
     // Event listener para redimensionamento
     const resizeHandler = () => {
@@ -187,26 +150,7 @@ chart_dic_genero_idade = {
 }
 ```
 
-
-::: {.columns}
-::: {.column width="100%"}
-::: {.card}
-###  Destaques: Gênero
-Homens, por diversos motivos morrem mais de DIC (veja ao final a lista de DICs). Considerando dados de `r year(min(sim_dic$data_obito[which(!is.na(sim_dic$data_obito))]))` a `r year(max(sim_dic$data_obito[which(!is.na(sim_dic$data_obito))]))`, homens representam `r percent(proporcao_masc__total, accuracy = 0.1)` do total de mortes.  
-Também morem mais cedo aos `r pico_masc` anos, comumente **`r pico_fem - pico_masc` anos** antes que mulheres.  
-:::
-:::
-:::
-
-
-
 ```{ojs}
-// Linha separando
-html`<hr style="border-top: 5px solid steelblue;
-               box-shadow: 0 2px 4px rgba(0,0,0,0.8);
-               margin: 5rem 0;">`
-
-
 //| echo: false
 // Ler dados do arquivo JSON
 dic_raca_cor_idade = FileAttachment("./fontes/dic_raca_cor_idade.json").json()
@@ -240,17 +184,8 @@ chart_raca_cor_idade = {
     
     const option = {
       title: {
-  text: 'Mortes por Raça/Cor e Idade (0 a 100 anos)',
-  left: 'center',
-  top: 10,
-  backgroundColor: '#72874E40',
-  padding: [8, 16],
-  textStyle: {
-    color: '#000',
-    fontSize: 16,
-    fontWeight: 'bold'
-  }
-},
+        text: 'Distribuição por Raça/Cor e Idade (0 a 100 anos)'
+      },
       tooltip: {
         trigger: 'axis'
       },
@@ -259,7 +194,6 @@ chart_raca_cor_idade = {
         bottom: 10
       },
       grid: {
-        top: 100,
         left: '3%',
         right: '4%',
         bottom: '15%',
@@ -281,7 +215,7 @@ chart_raca_cor_idade = {
         name: 'Quantidade'
       },
       // Configurações de animação
-      animationDuration: 2000,
+      animationDuration: 3000,
       animationEasing: 'cubicOut',
       series: racas.map(raca => {
         const dados = dados_filtrados.map(d => d[raca]);
@@ -291,19 +225,7 @@ chart_raca_cor_idade = {
           type: 'line',
           data: dados
         };
-      }),
-       graphic: [{
-    type: 'text',
-    // Usar coordenadas relativas ao grid (área do gráfico)
-    left: '10%',
-    top: '30%',
-    style: {
-      text: "",
-      fontSize: 20,
-      fill: 'rgba(34, 7, 7, 0.5)',
-      fontWeight: 'bold'
-    }
-  }]
+      })
     };
     
     // Renderizar o gráfico inicialmente sem os markPoints
@@ -356,7 +278,7 @@ chart_raca_cor_idade = {
       myChart.setOption({
         series: seriesWithMarkPoints
       });
-    }, 2100); // Esperar 2100ms (um pouco depois da animação das linhas)
+    }, 3100); // Esperar 3100ms (um pouco depois da animação das linhas)
 
     // Event listener para redimensionamento
     const resizeHandler = () => {
@@ -377,29 +299,9 @@ chart_raca_cor_idade = {
 ```
 
 
-::: {.columns}
-::: {.column width="100%"}
-::: {.card}
-###  Destaques: Raça/Cor
-Pessoas negras (pardas ou pretas) tam maiores chances de morrer antes de pessoas brancas.  
-Pessoas pardas: maior probabilidade de morte aos **`r pico_parda` anos**, `r pico_branca - pico_parda` antes que pessoas brancas.  
-Pessoas pretas: maior probabilidade de morte aos **`r pico_preta` anos**, `r pico_branca - pico_preta` antes que pessoas brancas.  
-
-
-:::
-:::
-:::
-
-
-
 ```{ojs}
 //| echo: false
 // Ler dados do arquivo JSON (cada objeto deve ter a chave "ano" + colunas de raça/cor)
-
-html`<hr style="border-top: 5px solid steelblue;
-               box-shadow: 0 2px 4px rgba(0,0,0,0.8);
-               margin: 5rem 0;">`
-
 dic_raca_cor_ano = FileAttachment("./fontes/dic_raca_cor_ano.json").json()
 
 // Ordenar por ano e garantir numérico
@@ -433,16 +335,7 @@ chart_ano = {
     const racasParaMarcar = ['Branca', 'Preta', 'Parda']
     
     const option = {
-       title: { text: 'Mortes por Gênero e Idade (0 a 100 anos)',
-  left: 'center',
-  top: 10,
-  backgroundColor: '#72874E40',
-  padding: [8, 16],
-  textStyle: {
-    color: '#000',
-    fontSize: 16,
-    fontWeight: 'bold'
-}},
+      title: { text: 'Distribuição por Raça/Cor ao longo dos anos' },
       tooltip: { trigger: 'axis' },
       legend: { data: racas, bottom: 10 },
       grid: { left: '3%', right: '4%', bottom: '15%', containLabel: true },
@@ -456,7 +349,7 @@ chart_ano = {
       yAxis: { type: 'value', name: 'Quantidade' },
       // paleta base (sobrescrevemos por série logo abaixo)
       color: ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'],
-      animationDuration: 2000,
+      animationDuration: 3000,
       animationEasing: 'cubicOut',
       series: racas.map((raca, index) => {
         const dados = dados_ordenados.map(d => +d[raca] || 0)
@@ -533,7 +426,7 @@ chart_ano = {
       })
       
       myChart.setOption({ series: seriesWithMarkPoints })
-    }, 2100)
+    }, 3100)
 
     // Event listener para redimensionamento
     const resizeHandler = () => {

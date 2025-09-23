@@ -7,8 +7,16 @@ website:
     left:
       - href: dic.qmd
         text: DIC
-      - about.qmd
-
+      - href: about.qmd
+        text: Sobre
+    right:
+      - icon: bluesky
+        href: https://bsky.app/profile/nossasaudeemdados.com.br
+      - icon: github
+        href: https://github.com/rolfregehr
+      - icon: envelope
+        href: mailto:rolf@nossasaudeemdados.com.br
+      
 format:
   html:
     theme:
